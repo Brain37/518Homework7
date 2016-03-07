@@ -2,14 +2,7 @@ var app = angular.module('homeContent', ["firebase"]);
 app.controller('contentController', function ($scope, $firebaseArray) {
     var ref = new Firebase("https://518projectsnowman.firebaseio.com/");
     var authData = ref.getAuth();
-    $scope.role = null;
     if (authData) {
-        //What role are we?
-        ref.child("role").child(authData.uid).on("value", function (data) {
-            //set role to user, admin, or provider
-            $scope.role = data.val();
-        });
-
         //if we still alive we are logged in
         $scope.userEmail = authData.password.email;
 
@@ -31,6 +24,6 @@ app.controller('contentController', function ($scope, $firebaseArray) {
         $scope.logout = function () {
             ref.unauth();
             window.location.href = "index.html";
-        }
+        };
     }
 });
