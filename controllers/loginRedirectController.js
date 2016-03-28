@@ -1,7 +1,7 @@
-var app = angular.module('home', ["firebase"]);
-var ref = new Firebase("https://518projectsnowman.firebaseio.com/");
-var authData = ref.getAuth();
+var app = angular.module('indexApp');
 app.controller('loginRedirect', function ($scope, $firebaseArray) {
+    var ref = new Firebase("https://518projectsnowman.firebaseio.com/");
+    var authData = ref.getAuth();
     if (!authData) {
         window.location.href = "index.html";
     }

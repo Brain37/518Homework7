@@ -1,8 +1,25 @@
-var app = angular.module('myApp', ["firebase"]);
-app.controller('formCtrl', function ($scope) {
+var app = angular.module('snowmanApp', ["firebase"]);
+app.controller('indexController', function ($scope) {
+    var ref = new Firebase("https://518projectsnowman.firebaseio.com/");
+    var authData = ref.getAuth();
+    $scope.isAuthenticated = false;
+    $scope.authData = authData;
+    if (authData) {
+        $scope.isAuthenticated = true;
+        $scope.userEmail = authData.password.email;
+        ref.child("role").child(authData.uid).on("value", function (data) {
+            //set role to user, admin, or provider
+            $scope.role = data.val();
+            $scope.$apply();
+        });
+    }
+
+    $scope.logout = function () {
+        ref.unauth();
+        location.reload();
+    }
+
     $scope.login = function () {
-        var ref = new Firebase("https://518projectsnowman.firebaseio.com/");
-        console.log($scope.username);
         ref.authWithPassword({
             email: $scope.username,
             password: $scope.password
@@ -10,7 +27,7 @@ app.controller('formCtrl', function ($scope) {
             if (error) {
                 console.log(error);
             } else {
-                window.location.href = 'home.html';
+                location.reload();
             }
         });
     };
