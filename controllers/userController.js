@@ -7,7 +7,8 @@ app.controller('userController', function ($scope, $firebaseArray) {
     var service_requests = ref.child("service_requests");
     $scope.service_request_data = $firebaseArray(service_requests.orderByChild("user").equalTo(authData.uid));
 
-    $scope.submit = function () {
+    $scope.submitServiceRequest = function () {
+
         //save the new service request to firebase
         console.log($scope.service_request_data);
         service_requests.push({
