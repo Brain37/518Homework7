@@ -6,8 +6,8 @@ License URL: http://creativecommons.org/licenses/by/3.0/
 -->
 <!DOCTYPE html>
 <html>
-<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script src="https://cdn.firebase.com/js/client/2.4.1/firebase.js"></script>
 <script src="https://cdn.firebase.com/libs/angularfire/1.1.3/angularfire.min.js"></script>
 <script src="controllers/indexController.js"></script>
@@ -34,46 +34,9 @@ License URL: http://creativecommons.org/licenses/by/3.0/
     <!--//webfonts-->
 </head>
 
-
-<button id="customButton">Purchase</button>
-
 <body ng-app="snowmanApp" ng-controller="indexController">
-    <script ng-controller="userController">
-        var handler = StripeCheckout.configure({
-            key: 'pk_test_sK0NKfB11WtkSFxyDGdna35M',
-            image: '/img/documentation/checkout/marketplace.png',
-            locale: 'auto',
-            token: function(token) {
-                $.post("http://localhost:3000/checkout", {
-                    stripeToken: token.id,
-                    amount: 2000
-                }, function(result) {
-                    console.log(result);
-                });
-
-                // Use the token to create the charge with a server-side script.
-                // You can access the token ID with `token.id`
-            }
-        });
-
-        $('#customButton').on('click', function(e) {
-            // Open Checkout with further options
-            handler.open({
-                name: 'Demo Site',
-                description: '2 widgets',
-                amount: 2000
-            });
-            e.preventDefault();
-        });
-
-        // Close Checkout on page navigation
-        $(window).on('popstate', function() {
-            handler.close();
-        });
-
-    </script>
     <div ng-if="isAuthenticated == false" class="login-form">
-        <form ng-controller="indexController">
+        <form>
             <img src="C:\Users\Brian Scott\Documents\Spring 2016\CSC 518\CareSit\images\baby-face.jpg" alt="" />
             <br/>&nbsp;
             <li>
@@ -89,51 +52,103 @@ License URL: http://creativecommons.org/licenses/by/3.0/
             </div>
         </form>
     </div>
+
     <div ng-if="isAuthenticated == true">
         <h1 style="color:#FFFFFF;">Welcome {{ userEmail }} - {{ role }}</h1>
         <button ng-click="logout()">logout</button>
 
-        <div ng-if="role == 'user'" ng-controller="userController">
+        <div id="main" ng-if="role == user" ng-controller="userController">
+            <script>
+                var handler = StripeCheckout.configure({
+                    key: 'pk_test_sK0NKfB11WtkSFxyDGdna35M',
+                    image: '/img/documentation/checkout/marketplace.png',
+                    locale: 'auto',
+                    token: function(token) {
+                        var scope = angular.element(document.getElementById("main")).scope();
+                        scope = scope.$$childHead;
+                        var serviceName = scope.service_name;
+                        var startTime = scope.start_time;
+                        var endTime = scope.end_time;
+                        var startDate = scope.start_date;
+                        var endDate = scope.end_date;
 
-            <table width="100%">
-                <tr>
-                    <td width="50%">
-                        <form novalidate>
-                            <h3 style="color:#FFFFFF;">Service Name:</h3>
-                            <input type="text" placeholder="description" ng-model="service_name" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
-                            <h3 style="color:#FFFFFF;"> Start Date:</h3>
-                            <input type="text" placeholder="month and number" ng-model="start_date" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
-                            <h3 style="color:#FFFFFF;"> Start Time:</h3>
-                            <input type="text" placeholder="time AM/PM" ng-model="start_time" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
-                            <h3 style="color:#FFFFFF;"> End Date:</h3>
-                            <input type="text" placeholder="month and number" ng-model="end_date" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
-                            <h3 style="color:#FFFFFF;"> End Time:</h3>
-                            <input type="text" placeholder="time AM/PM" ng-model="end_time" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
-                        </form>
-                    </td>
-                    <td>
-                        <h3 style="color:#FFFFFF;">Pending Requests (no provider yet):</h3>
-                        <ul>
-                            <li style="color:#FFFFFF;" ng-repeat="obj in service_request_data | filter:{ provider: 'n/a'}">{{ obj.name }} {{ obj.startDate }} @ {{ obj.startTime }} - {{ obj.endDate }} @ {{ obj.endTime }} </li>
-                        </ul>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <h3 style="color:#FFFFFF;">Incomplete Jobs:</h3>
-                        <ul>
-                            <li style="color:#FFFFFF;" ng-repeat="obj in service_request_data | filter:{ completed: false, provider: '!n/a'}">{{ obj.name }} {{ obj.startDate }} @ {{ obj.startTime }} - {{ obj.endDate }} @ {{ obj.endTime }} ({{ obj.provider}})</li>
-                        </ul>
-                    </td>
-                    <td>
-                        <h3 style="color:#FFFFFF;">Completed Jobs:</h3>
-                        <ul>
-                            <li style="color:#FFFFFF;" ng-repeat="obj in service_request_data | filter:{ completed: true}">{{ obj.name }} {{ obj.startDate }} @ {{ obj.startTime }} - {{ obj.endDate }} @ {{ obj.endTime }} ({{ obj.provider}})</li>
-                        </ul>
-                    </td>
-                </tr>
-            </table>
+                        $.post("http://localhost:3000/checkout", {
+                            stripeToken: token.id,
+                            amount: 2000
+                        }, function(result) {
+                            console.log(result);
+                            if (result == 'success') {
+                                $scope.reset();
+                                $scope.submitServiceRequest()
+                            } else {
+                                console.log("fuck! my ass!")
+                            }
+                        });
+                    }
+                });
+
+                function purchaseButtonPressed() {
+                    var scope = angular.element(document.getElementById("main")).scope();
+                    scope = scope.$$childHead;
+                    var serviceName = scope.service_name;
+                    var startTime = scope.start_time;
+                    var endTime = scope.end_time;
+                    var startDate = scope.start_date;
+                    var endDate = scope.end_date;
+
+                    handler.open({
+                        name: 'careSit Checkout',
+                        description: 'Care',
+                        amount: 2000
+                    });
+                }
+
+                $(window).on('popstate', function() {
+                    handler.close();
+                });
+
+            </script>
         </div>
+
+        <table width="100%">
+            <tr>
+                <td width="50%">
+                    <form novalidate>
+                        <h3 style="color:#FFFFFF;">Service Name:</h3>
+                        <input type="text" placeholder="description" ng-model="service_name" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
+                        <h3 style="color:#FFFFFF;"> Start Date:</h3>
+                        <input type="text" placeholder="month and number" ng-model="start_date" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
+                        <h3 style="color:#FFFFFF;"> Start Time:</h3>
+                        <input type="text" placeholder="time AM/PM" ng-model="start_time" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
+                        <h3 style="color:#FFFFFF;"> End Date:</h3>
+                        <input type="text" placeholder="month and number" ng-model="end_date" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
+                        <h3 style="color:#FFFFFF;"> End Time:</h3>
+                        <input type="text" placeholder="time AM/PM" ng-model="end_time" style="color:#FFFFFF; border:2px; border-style:solid; border-color:#000000;">
+                    </form>
+                    <button onclick="purchaseButtonPressed()">Purchase</button>
+                </td>
+                <td>
+                    <h3 style="color:#FFFFFF;">Pending Requests (no provider yet):</h3>
+                    <ul>
+                        <li style="color:#FFFFFF;" ng-repeat="obj in service_request_data | filter:{ provider: 'n/a'}">{{ obj.name }} {{ obj.startDate }} @ {{ obj.startTime }} - {{ obj.endDate }} @ {{ obj.endTime }} </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h3 style="color:#FFFFFF;">Incomplete Jobs:</h3>
+                    <ul>
+                        <li style="color:#FFFFFF;" ng-repeat="obj in service_request_data | filter:{ completed: false, provider: '!n/a'}">{{ obj.name }} {{ obj.startDate }} @ {{ obj.startTime }} - {{ obj.endDate }} @ {{ obj.endTime }} ({{ obj.provider}})</li>
+                    </ul>
+                </td>
+                <td>
+                    <h3 style="color:#FFFFFF;">Completed Jobs:</h3>
+                    <ul>
+                        <li style="color:#FFFFFF;" ng-repeat="obj in service_request_data | filter:{ completed: true}">{{ obj.name }} {{ obj.startDate }} @ {{ obj.startTime }} - {{ obj.endDate }} @ {{ obj.endTime }} ({{ obj.provider}})</li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 

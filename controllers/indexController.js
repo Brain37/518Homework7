@@ -14,6 +14,12 @@ app.controller('indexController', function ($scope) {
         });
     }
 
+    $scope.submitForm = function () {
+        console.log("posting data..");
+        formData = $scope.form;
+        console.log(formData);
+    }
+
     $scope.logout = function () {
         ref.unauth();
         location.reload();

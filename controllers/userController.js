@@ -21,11 +21,14 @@ app.controller('userController', function ($scope, $firebaseArray) {
             provider: "n/a",
             completed: false
         });
+    }
+
+    $scope.reset = function () {
         $scope.service_name = "";
         $scope.start_time = "";
         $scope.end_time = "";
         $scope.start_date = "";
         $scope.end_date = "";
-
+        $scope.$apply();
     }
 });
